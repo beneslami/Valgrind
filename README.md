@@ -33,3 +33,33 @@ Performance: target software may run up to 10 to 30 times slower when run under 
 Memory footprint: each allocation within the target program requires valgrind to make a memory allocation as well (making running valgrind on highly-resource-constrained embedded linux systems difficult).
 
 In order to see the call stack with line-numebr information, a recompile/build with the -g flag is required.
+
+## Ltrace and Strace
+
+Strace stands for System call Tracer. It is a debugging tool that monitors the system calls used by a program and all the signals it receives. System calls are used by userspace applications when they need to do something that requires the kernel.
+```
+strace <executable file>
+```
+Reading strace output:
+
+Each line in the output represents a system call. They follow the following format:
+```
+system_call(argument1, argument2, ...) = return_value
+```
+Errors(typically a return value of -1) have the errno symbol and error string appended. For example:
+
+open("/foor/bar", O_RDONLY) = -1 ENOENT (No such file or directory)
+
+If we want to monitor a process which is currently running we can attach to the process using -p option.
+```
+$ strace -p <pid-of-the-app>
+```
+Sometimes the full system call trace is too much. Therefore, using -e option, we can also specify which system calls to be traced. To trace only open() and close() system calls use the following command:
+```
+$ strace -e trace='open,close' <program-name>
+```
+
+Similarly, we can also use negation option to not trace specific system calls. If we don't want to trace open(), system call in previous example we can give the below command:
+```
+$ strace -e trace='!open,close' <program-name>
+```
